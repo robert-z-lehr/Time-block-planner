@@ -32,7 +32,7 @@ td{height:49px;vertical-align:middle}
 td.time-cell{position:relative;font-size:10px;font-weight:750;white-space:nowrap;background:#fafaf9;overflow:visible;text-align:center;padding:0 1px} .time-marker{position:absolute;top:-7px;left:0;right:0;z-index:1;display:block;background:#fafaf9;line-height:14px;font-size:9px;width:max-content;max-width:100%;margin:auto;padding:0 1px} .time-marker.end{top:auto;bottom:-7px} th.priority-head{font-size:9px;letter-spacing:0;text-align:center;padding:0 2px} td.priority-cell textarea{text-align:center}
 td textarea{border:0;outline:none;resize:none;display:block;width:100%;height:45px;min-height:45px;line-height:20px;padding:2px 0;background:transparent;color:var(--ink);font-size:12px;overflow:auto}
 td textarea:focus-visible{outline:1px solid var(--accent);outline-offset:-1px}
-.sheet-footer{margin-top:8px;font-size:9px;color:var(--muted);display:flex;justify-content:space-between}
+
 @media(max-width:640px){.sheet{padding:16px;min-height:0}.sheet-head{align-items:flex-start;flex-direction:column}h1{font-size:20px}.date-field input{width:180px}col.priority{width:10%}col.tasks{width:40%}col.time{width:11%}col.events{width:39%}th,td{padding:0 5px}td.time-cell{font-size:9px}.time-marker{font-size:8px}td textarea{font-size:12px}}
 @page{size:letter portrait;margin:.35in}
 @media print{
@@ -49,7 +49,7 @@ td textarea:focus-visible{outline:1px solid var(--accent);outline-offset:-1px}
  td{height:47px}.time-marker{font-size:8px}
  td textarea{height:43px;min-height:43px;overflow:hidden;resize:none;font-size:11px;line-height:18px}
  tr{break-inside:avoid;page-break-inside:avoid}
- .sheet-footer{font-size:8px}
+ 
 }
 </style>
 </head>
@@ -68,8 +68,7 @@ td textarea:focus-visible{outline:1px solid var(--accent);outline-offset:-1px}
   <thead><tr id="columnHeaders"></tr></thead>
   <tbody id="scheduleRows"></tbody>
  </table>
- <div class="sheet-footer"><span>Daily Time Block Planner</span></div>
-</article></main>
+ </article></main>
 <script>
 (function(){
  const tbody=document.getElementById('scheduleRows');
@@ -125,20 +124,16 @@ td textarea:focus-visible{outline:1px solid var(--accent);outline-offset:-1px}
  renderColumns();renderClock();
  const date=document.getElementById('plannerDate');
  const fields=[...document.querySelectorAll('textarea')];
+ // Every page load starts with empty planner cells. No old entries are restored.
+ fields.forEach(el=>{el.value='';});
  try{
   date.value=localStorage.getItem('timeblock-date')||new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
-  date.addEventListener('change',()=>localStorage.setItem('timeblock-date',date.value));
-  fields.forEach(el=>{
-   const key='timeblock-'+el.dataset.key;
-   const oldKey=el.dataset.key.startsWith('tasks-')?'timeblock-adjusted-'+el.dataset.key.slice(6):el.dataset.key.startsWith('events-')?'timeblock-routine-'+el.dataset.key.slice(7):null;
-   el.value=localStorage.getItem(key)||(oldKey?localStorage.getItem(oldKey):'')||'';
-   el.addEventListener('input',()=>localStorage.setItem(key,el.value));
-  });
+  date.addEventListener('change',()=>store('timeblock-date',date.value));
  }catch(e){date.value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10)}
  document.getElementById('printBtn').addEventListener('click',()=>window.print());
  document.getElementById('clearBtn').addEventListener('click',()=>{
   if(!confirm('Clear all Priority, Tasks, and Events entries?'))return;
-  fields.forEach(el=>{el.value='';try{localStorage.removeItem('timeblock-'+el.dataset.key)}catch(e){}});
+  fields.forEach(el=>{el.value='';});
  });
 })();
 </script>
