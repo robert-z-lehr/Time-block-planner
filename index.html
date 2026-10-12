@@ -61,7 +61,7 @@ td textarea:focus-visible{outline:1px solid var(--accent);outline-offset:-1px}
  <button type="button" id="clearBtn">Clear entries</button>
 </div></header>
 <main><article class="sheet" aria-label="Daily time block schedule">
- <div class="sheet-head"><div><h1>DAILY TIME BLOCK SCHEDULE</h1><p class="subtitle">Click the arrow beside any column heading to move it right.</p></div>
+ <div class="sheet-head"><div><h1>DAILY TIME BLOCK SCHEDULE</h1><p class="subtitle">Use the arrows beside a column heading to move it left or right.</p></div>
  <label class="date-field" for="plannerDate">Date<input type="date" id="plannerDate"></label></div>
  <table aria-label="Hourly schedule from 6 AM to 10 PM">
   <colgroup id="columnWidths"><col class="priority"><col class="tasks"><col class="events"><col class="time"></colgroup>
@@ -106,11 +106,20 @@ td textarea:focus-visible{outline:1px solid var(--accent);outline-offset:-1px}
    const th=document.createElement('th');th.scope='col';th.dataset.column=type;
    if(type==='priority')th.className='priority-head';
    const label=document.createElement('span');label.className='column-heading';label.textContent=type[0].toUpperCase()+type.slice(1);th.appendChild(label);
-   const move=document.createElement('button');move.type='button';move.className='move-col';move.textContent='→';
-   move.title='Move '+type+' one column right (wrap to left)';
-   move.setAttribute('aria-label','Move '+type+' one column right');
-   move.addEventListener('click',()=>{const index=order.indexOf(type);const next=(index+1)%order.length;[order[index],order[next]]=[order[next],order[index]];store('timeblock-column-order',JSON.stringify(order));renderColumns()});
-   th.appendChild(move);headers.appendChild(th);
+   for(const direction of [-1,1]){
+    const move=document.createElement('button');move.type='button';move.className='move-col';
+    move.textContent=direction<0?'←':'→';
+    const side=direction<0?'left':'right';
+    move.title='Move '+type+' one column '+side+' (wrap around)';
+    move.setAttribute('aria-label','Move '+type+' one column '+side);
+    move.addEventListener('click',()=>{
+     const index=order.indexOf(type),next=(index+direction+order.length)%order.length;
+     [order[index],order[next]]=[order[next],order[index]];
+     store('timeblock-column-order',JSON.stringify(order));renderColumns();
+    });
+    th.appendChild(move);
+   }
+   headers.appendChild(th);
   });
   for(const tr of tbody.rows){const cells=Object.fromEntries([...tr.cells].map(td=>[td.dataset.column,td]));order.forEach(type=>tr.appendChild(cells[type]))}
  }
