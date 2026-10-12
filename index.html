@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="An editable one-page daily time block planner. Compare your routine with your adjusted schedule and print on one letter-sized sheet.">
+<meta name="description" content="An editable one-page daily time block planner. Plan tasks and events with a priority column and hourly boundary markers, then print on one letter-sized sheet.">
 <title>Daily Time Block Schedule</title>
 <style>
 :root{--ink:#171717;--muted:#666;--line:#bfc5c1;--accent:#2e5b4d;--paper:#fff;color-scheme:light}
@@ -25,15 +25,15 @@ h1{font-size:23px;line-height:1.15;margin:0;font-weight:800}
 .date-field{display:flex;flex-direction:column;gap:4px;font-size:10px;font-weight:750;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
 .date-field input{width:165px;border:1px solid var(--line);border-radius:5px;padding:6px;background:#fff;color:var(--ink)}
 table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid var(--line)}
-col.time{width:13%}col.entry{width:43.5%}
+col.priority{width:10%}col.tasks{width:40%}col.time{width:10%}col.events{width:40%}
 th{height:36px;text-align:left;background:#f5f5f3;text-transform:uppercase;font-size:11px;letter-spacing:.06em}
-th,td{border:1px solid var(--line);padding:0 9px}
+th,td{border:1px solid var(--line);padding:0 7px}
 td{height:49px;vertical-align:middle}
-td.time-cell{font-size:11px;font-weight:750;white-space:nowrap;background:#fafaf9}
+td.time-cell{position:relative;font-size:10px;font-weight:750;white-space:nowrap;background:#fafaf9;overflow:visible;text-align:center;padding:0 1px} .time-marker{position:absolute;top:-7px;left:0;right:0;z-index:1;display:block;background:#fafaf9;line-height:14px;font-size:9px;width:max-content;max-width:100%;margin:auto;padding:0 1px} .time-marker.end{top:auto;bottom:-7px} th.priority-head{font-size:9px;letter-spacing:0;text-align:center;padding:0 2px} td.priority-cell textarea{text-align:center}
 td textarea{border:0;outline:none;resize:none;display:block;width:100%;height:45px;min-height:45px;line-height:20px;padding:2px 0;background:transparent;color:var(--ink);font-size:12px;overflow:auto}
 td textarea:focus-visible{outline:1px solid var(--accent);outline-offset:-1px}
 .sheet-footer{margin-top:8px;font-size:9px;color:var(--muted);display:flex;justify-content:space-between}
-@media(max-width:640px){.sheet{padding:16px;min-height:0}.sheet-head{align-items:flex-start;flex-direction:column}h1{font-size:20px}.date-field input{width:180px}col.time{width:20%}col.entry{width:40%}th,td{padding:0 5px}td.time-cell{font-size:10px}td textarea{font-size:12px}}
+@media(max-width:640px){.sheet{padding:16px;min-height:0}.sheet-head{align-items:flex-start;flex-direction:column}h1{font-size:20px}.date-field input{width:180px}col.priority{width:13%}col.tasks{width:37%}col.time{width:13%}col.events{width:37%}th,td{padding:0 5px}td.time-cell{font-size:9px}.time-marker{font-size:8px}td textarea{font-size:12px}}
 @page{size:letter portrait;margin:.35in}
 @media print{
  html,body{background:white!important;margin:0!important;padding:0!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}
@@ -46,7 +46,7 @@ td textarea:focus-visible{outline:1px solid var(--accent);outline-offset:-1px}
  .date-field input{border:0;border-bottom:1px solid #888;border-radius:0;padding:3px 0;width:145px;font-size:11px}
  table{break-inside:avoid;page-break-inside:avoid}
  th{height:30px;font-size:10px}
- td{height:47px}
+ td{height:47px}.time-marker{font-size:8px}
  td textarea{height:43px;min-height:43px;overflow:hidden;resize:none;font-size:11px;line-height:18px}
  tr{break-inside:avoid;page-break-inside:avoid}
  .sheet-footer{font-size:8px}
@@ -60,11 +60,11 @@ td textarea:focus-visible{outline:1px solid var(--accent);outline-offset:-1px}
  <button type="button" id="clearBtn">Clear entries</button>
 </div></header>
 <main><article class="sheet" aria-label="Daily time block schedule">
- <div class="sheet-head"><div><h1>DAILY TIME BLOCK SCHEDULE</h1><p class="subtitle">Plan your routine. Record adjustments as the day unfolds.</p></div>
+ <div class="sheet-head"><div><h1>DAILY TIME BLOCK SCHEDULE</h1><p class="subtitle">Organize tasks by priority and map events against the hours of your day.</p></div>
  <label class="date-field" for="plannerDate">Date<input type="date" id="plannerDate"></label></div>
  <table aria-label="Hourly schedule from 6 AM to 10 PM">
-  <colgroup><col class="time"><col class="entry"><col class="entry"></colgroup>
-  <thead><tr><th scope="col">Time</th><th scope="col">Routine</th><th scope="col">Adjusted</th></tr></thead>
+  <colgroup><col class="priority"><col class="tasks"><col class="time"><col class="events"></colgroup>
+  <thead><tr><th scope="col" class="priority-head">Priority</th><th scope="col">Tasks</th><th scope="col">Time</th><th scope="col">Events</th></tr></thead>
   <tbody id="scheduleRows"></tbody>
  </table>
  <div class="sheet-footer"><span>Daily Time Block Planner</span><span>One-day / one-page worksheet</span></div>
@@ -73,15 +73,21 @@ td textarea:focus-visible{outline:1px solid var(--accent);outline-offset:-1px}
 (function(){
  const tbody=document.getElementById('scheduleRows');
  function clock(hour){return String(hour%12||12)+':00 '+(hour<12?'AM':'PM')}
- for(let hour=6;hour<=22;hour++){
+ function addField(tr,type,hour){
+  const td=document.createElement('td');if(type==='priority')td.className='priority-cell';
+  const field=document.createElement('textarea');field.rows=2;field.dataset.key=type+'-'+hour;
+  field.setAttribute('aria-label',type+' for '+clock(hour)+' to '+clock(hour+1));
+  td.appendChild(field);tr.appendChild(td);
+ }
+ for(let hour=6;hour<22;hour++){
   const tr=document.createElement('tr');
-  const time=document.createElement('td');time.className='time-cell';time.textContent=clock(hour);tr.appendChild(time);
-  for(const type of ['routine','adjusted']){
-   const td=document.createElement('td');
-   const field=document.createElement('textarea');field.rows=2;field.dataset.key=type+'-'+hour;
-   field.setAttribute('aria-label',type+' at '+clock(hour));
-   td.appendChild(field);tr.appendChild(td);
-  }
+  addField(tr,'priority',hour);
+  addField(tr,'tasks',hour);
+  const time=document.createElement('td');time.className='time-cell';
+  const tick=document.createElement('span');tick.className='time-marker';tick.textContent=clock(hour);time.appendChild(tick);
+  if(hour===21){const last=document.createElement('span');last.className='time-marker end';last.textContent=clock(22);time.appendChild(last)}
+  tr.appendChild(time);
+  addField(tr,'events',hour);
   tbody.appendChild(tr);
  }
  const date=document.getElementById('plannerDate');
@@ -89,11 +95,16 @@ td textarea:focus-visible{outline:1px solid var(--accent);outline-offset:-1px}
  try{
   date.value=localStorage.getItem('timeblock-date')||new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
   date.addEventListener('change',()=>localStorage.setItem('timeblock-date',date.value));
-  fields.forEach(el=>{el.value=localStorage.getItem('timeblock-'+el.dataset.key)||'';el.addEventListener('input',()=>localStorage.setItem('timeblock-'+el.dataset.key,el.value))});
+  fields.forEach(el=>{
+   const key='timeblock-'+el.dataset.key;
+   const oldKey=el.dataset.key.startsWith('tasks-')?'timeblock-adjusted-'+el.dataset.key.slice(6):el.dataset.key.startsWith('events-')?'timeblock-routine-'+el.dataset.key.slice(7):null;
+   el.value=localStorage.getItem(key)||(oldKey?localStorage.getItem(oldKey):'')||'';
+   el.addEventListener('input',()=>localStorage.setItem(key,el.value));
+  });
  }catch(e){date.value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10)}
  document.getElementById('printBtn').addEventListener('click',()=>window.print());
  document.getElementById('clearBtn').addEventListener('click',()=>{
-  if(!confirm('Clear all Routine and Adjusted entries?'))return;
+  if(!confirm('Clear all Priority, Tasks, and Events entries?'))return;
   fields.forEach(el=>{el.value='';try{localStorage.removeItem('timeblock-'+el.dataset.key)}catch(e){}});
  });
 })();
