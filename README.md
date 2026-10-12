@@ -1,4 +1,4 @@
-# Daily Time Block Planner
+# [Daily Time Block Planner](https://robert-z-lehr.github.io/Time-block-planner/)
 
 A one-sided, editable daily worksheet with hourly intervals from **6:00 AM through 10:00 PM** and columns in the order **Priority | Tasks | Events | Time**. Hour labels are positioned at the horizontal interval boundaries.
 
