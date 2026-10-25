@@ -19,7 +19,7 @@ button.primary{background:var(--accent);border-color:var(--accent);color:white}
 button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 main{padding:24px 12px 48px}
 .sheet{width:min(8.5in,100%);min-height:11in;background:var(--paper);padding:.45in;margin:auto;box-shadow:0 5px 24px #00000018;border-radius:3px}
-.sheet-head{border-bottom:2px solid var(--ink);display:flex;align-items:end;justify-content:space-between;gap:14px;padding-bottom:12px;margin-bottom:12px}
+.sheet-head{border-bottom:2px solid var(--ink);display:flex;align-items:start;justify-content:space-between;gap:14px;padding-bottom:9px;margin-bottom:10px}.header-meta{margin-left:auto;display:flex;align-items:start;gap:12px;justify-content:flex-end;flex-shrink:0}.planner-qr{display:flex;flex-direction:column;align-items:center;gap:3px;width:92px;margin-left:auto}.planner-qr img{display:block;width:80px;height:80px;object-fit:contain}.planner-qr span{text-align:center;font-size:9px;line-height:1.15;font-weight:700;white-space:nowrap}
 h1{font-size:23px;line-height:1.15;margin:0;font-weight:800}
 .subtitle{font-size:11px;color:var(--muted);margin:5px 0 0}
 .date-field{display:flex;flex-direction:column;gap:4px;font-size:10px;font-weight:750;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
@@ -33,14 +33,14 @@ td.time-cell{position:relative;font-size:10px;font-weight:750;white-space:nowrap
 td textarea{border:0;outline:none;resize:none;display:block;width:100%;height:45px;min-height:45px;line-height:20px;padding:2px 0;background:transparent;color:var(--ink);font-size:12px;overflow:auto}
 td textarea:focus-visible{outline:1px solid var(--accent);outline-offset:-1px}
 
-@media(max-width:640px){.sheet{padding:16px;min-height:0}.sheet-head{align-items:flex-start;flex-direction:column}h1{font-size:20px}.date-field input{width:180px}col.priority{width:12%}col.tasks{width:38%}col.time{width:13%}col.events{width:37%}th,td{padding:0 5px}td.time-cell{font-size:9px}.time-marker{font-size:8px}td textarea{font-size:12px}}
+@media(max-width:640px){.sheet{padding:16px;min-height:0}.sheet-head{align-items:flex-start;flex-direction:column}.header-meta{width:100%;margin-left:0;justify-content:space-between}.planner-qr{margin-left:auto}h1{font-size:20px}.date-field input{width:180px}col.priority{width:12%}col.tasks{width:38%}col.time{width:13%}col.events{width:37%}th,td{padding:0 5px}td.time-cell{font-size:9px}.time-marker{font-size:8px}td textarea{font-size:12px}}
 @page{size:letter portrait;margin:.35in}
 @media print{
  html,body{background:white!important;margin:0!important;padding:0!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}
  .toolbar,.move-col,.format-hint,.screen-only{display:none!important}.time-title-toggle{color:#000!important;text-decoration:none!important;pointer-events:none!important}
  main{padding:0!important}
  .sheet{width:100%!important;min-height:0!important;height:auto!important;margin:0!important;padding:0!important;box-shadow:none!important;border-radius:0!important}
- .sheet-head{padding-bottom:8px;margin-bottom:9px}
+ .sheet-head{padding-bottom:6px;margin-bottom:7px;min-height:96px}.header-meta{margin-left:auto;justify-content:flex-end}.planner-qr{margin-left:auto;align-items:center}.planner-qr img{width:76px;height:76px}.planner-qr span{font-size:8px}
  h1{font-size:21px}
  .subtitle{font-size:10px}
  .date-field input{border:0;border-bottom:1px solid #888;border-radius:0;padding:3px 0;width:145px;font-size:11px}.date-field input:not(.has-date){color:transparent!important}.date-field input:not(.has-date)::-webkit-datetime-edit{color:transparent!important}.date-field input:not(.has-date)::-webkit-calendar-picker-indicator{visibility:hidden!important}
@@ -61,7 +61,7 @@ td textarea:focus-visible{outline:1px solid var(--accent);outline-offset:-1px}
 </div></header>
 <main><article class="sheet" aria-label="Daily time block schedule">
  <div class="sheet-head"><div><h1>DAILY TIME BLOCK SCHEDULE</h1><p class="subtitle screen-only">Use the arrows beside a column heading to move it left or right.</p></div>
- <label class="date-field" for="plannerDate">Date<input type="date" id="plannerDate"></label></div>
+ <div class="header-meta"><label class="date-field" for="plannerDate">Date<input type="date" id="plannerDate"></label><div class="planner-qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&amp;data=https%3A%2F%2Frobert-z-lehr.github.io%2FTime-block-planner%2F" alt="QR code linking to Time Block Planner" width="80" height="80"><span>Time Block Planner</span></div></div></div>
  <table aria-label="Hourly schedule from 6 AM to 10 PM">
   <colgroup id="columnWidths"><col class="priority"><col class="tasks"><col class="events"><col class="time"></colgroup>
   <thead><tr id="columnHeaders"></tr></thead>
